@@ -1,3 +1,3 @@
-const nome = 'oi'
+const nome = 'oi';
 
-console.log(nome)
+console.log(nome);

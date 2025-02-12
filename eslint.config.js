@@ -1,7 +1,9 @@
-import js from '@eslint/js'
+import js from '@eslint/js';
+import prettier from 'eslint-config-prettier';
 
 export default [
     js.configs.recommended,
+    prettier, // <- Adiciona a configuração do Prettier
     {
         languageOptions: {
             ecmaVersion: 'latest',
@@ -17,4 +19,4 @@ export default [
             eqeqeq: 'error',
         },
     },
-]
+];
