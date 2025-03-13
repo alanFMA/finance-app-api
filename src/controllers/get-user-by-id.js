@@ -1,5 +1,10 @@
 import { GetUserByIdUseCase } from '../use-cases/get-user-by-id.js';
-import { badRequest, notFound, ok, serverError } from './helpers.js';
+import {
+    badRequest,
+    notFound,
+    ok,
+    serverError,
+} from '../controllers/helpers/http.js';
 import validator from 'validator';
 
 export class GetUserByIdController {
