@@ -5,12 +5,14 @@ import {
     ok,
     serverError,
 } from '../controllers/helpers/http.js';
-import validator from 'validator';
+import { checkIfIdIsValid } from './helpers/user.js';
 
 export class GetUserByIdController {
     async execute(httpRequest) {
         try {
-            const isIdValid = validator.isUUID(httpRequest.params.userId);
+            const userId = httpRequest.params.userId;
+
+            const isIdValid = checkIfIdIsValid(userId);
 
             if (!isIdValid) {
                 return badRequest({
@@ -20,9 +22,7 @@ export class GetUserByIdController {
 
             const getUserByIdUseCase = new GetUserByIdUseCase();
 
-            const user = await getUserByIdUseCase.execute(
-                httpRequest.params.userId,
-            );
+            const user = await getUserByIdUseCase.execute(userId);
 
             if (!user) {
                 return notFound({ message: 'user not found.' });
