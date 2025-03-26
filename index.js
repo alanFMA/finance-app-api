@@ -11,11 +11,13 @@ import {
     PostgresCreateUserRepository,
     PostgresGetUserByEmailRepository,
     PostgresUpdateUserRepository,
+    PostgresDeleteUserRepository,
 } from './src/repositories/postgres/index.js';
 import {
     GetUserByIdUseCase,
     CreateUserUseCase,
     UpdateUserUseCase,
+    DeleteUserUseCase,
 } from './src/use-cases/index.js';
 const app = express();
 
@@ -66,7 +68,11 @@ app.patch('/api/users/:userId', async (request, response) => {
 });
 
 app.delete('/api/users/:userId', async (request, response) => {
-    const deleteUserController = new DeleteUserController();
+    const deleteUserRepository = new PostgresDeleteUserRepository();
+
+    const deleteUserUseCase = new DeleteUserUseCase(deleteUserRepository);
+
+    const deleteUserController = new DeleteUserController(deleteUserUseCase);
 
     const { statusCode, body } = await deleteUserController.execute(request);
     console.log(body);
