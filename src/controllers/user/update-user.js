@@ -1,4 +1,4 @@
-import validator from 'validator';
+import { EmailAlreadyInUseError } from '../../errors/user.js';
 import {
     checkIfIdIsValid,
     checkIfPasswordIsValid,
@@ -8,7 +8,8 @@ import {
     badRequest,
     ok,
     serverError,
-} from './helpers/index.js';
+    checkIfEmailIsValid,
+} from '../helpers/index.js';
 
 export class UpdateUserController {
     constructor(updateUserUseCase) {
@@ -53,7 +54,7 @@ export class UpdateUserController {
             }
 
             if (params.email) {
-                const emailIsValid = validator.isEmail(params.email);
+                const emailIsValid = checkIfEmailIsValid(params.email);
 
                 if (!emailIsValid) {
                     return emailIsAlreadyInUseResponse();
