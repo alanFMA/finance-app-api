@@ -6,9 +6,8 @@ import {
 import { CreateTransactionUseCase } from '../../use-cases/index.js';
 
 export const makeCreateTransactionController = () => {
-    const createTransactionRepository = new PostgresCreateTransactionRepository(
-        XMLDocument,
-    );
+    const createTransactionRepository =
+        new PostgresCreateTransactionRepository();
 
     const getUserByIdRepository = new PostgressGetUserByIdRepository();
 
