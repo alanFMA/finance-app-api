@@ -15,7 +15,7 @@ export class GetTransactionsByUserIdController {
 
     async execute(httpRequest) {
         try {
-            const userId = httpRequest.query.user_id;
+            const userId = httpRequest.query.userId;
 
             if (!userId) {
                 return requiredFieldsIsMissingResponse('userId');
@@ -27,9 +27,10 @@ export class GetTransactionsByUserIdController {
                 return invalidIdResponse();
             }
 
-            const transactions = await this.getTransactionsByUserIdUseCase({
-                userId,
-            });
+            const transactions =
+                await this.getTransactionsByUserIdUseCase.execute({
+                    userId,
+                });
 
             return ok(transactions);
         } catch (error) {
