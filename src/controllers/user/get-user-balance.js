@@ -5,7 +5,7 @@ import {
     checkIfIdIsValid,
     invalidIdResponse,
     ok,
-} from '../helpers.js';
+} from '../helpers/index.js';
 
 export class GetUserBalanceController {
     constructor(getUserBalanceUseCase) {
@@ -16,7 +16,7 @@ export class GetUserBalanceController {
         try {
             const userId = httpRequest.params.userId;
 
-            const idIsValid = checkIfIdIsValid();
+            const idIsValid = checkIfIdIsValid(userId);
 
             if (!idIsValid) {
                 return invalidIdResponse();
