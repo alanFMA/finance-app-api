@@ -45,7 +45,6 @@ export class UpdateUserController {
                     acc[issue.path[0]] = issue.message;
                     return acc;
                 }, {});
-                console.log(formattedErrors);
                 return badRequest(formattedErrors);
             }
 
