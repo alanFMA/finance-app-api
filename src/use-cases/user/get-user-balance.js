@@ -1,11 +1,9 @@
 export class GetUserBalanceUseCase {
-    constructor({ getUserBalanceRepository, getUserByIdRepository }) {
+    constructor(getUserBalanceRepository, getUserByIdRepository) {
         this.getUserBalanceRepository = getUserBalanceRepository;
         this.getUserByIdRepository = getUserByIdRepository;
     }
-    async execute(params) {
-        const { userId } = params;
-
+    async execute(userId) {
         const user = await this.getUserByIdRepository.execute(userId);
 
         if (!user) {

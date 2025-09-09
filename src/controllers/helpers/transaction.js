@@ -13,7 +13,7 @@ export const checkIfAmountIsValid = (amount) => {
 };
 
 export const checkIfTypeIsValid = (type) => {
-    return ['EARNING', 'EXPENSE', 'INVESTIMENT'].includes(type);
+    return ['EARNING', 'EXPENSE', 'INVESTMENT'].includes(type);
 };
 
 export const invalidAmountResponse = () => {
