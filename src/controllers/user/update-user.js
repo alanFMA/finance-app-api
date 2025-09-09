@@ -1,15 +1,13 @@
 import { EmailAlreadyInUseError } from '../../errors/user.js';
+import { updateUserSchema } from '../../schemas/user.js';
 import {
     checkIfIdIsValid,
-    checkIfPasswordIsValid,
-    emailIsAlreadyInUseResponse,
     invalidIdResponse,
-    invalidPasswordResponse,
     badRequest,
     ok,
     serverError,
-    checkIfEmailIsValid,
 } from '../helpers/index.js';
+import { ZodError } from 'zod';
 
 export class UpdateUserController {
     constructor(updateUserUseCase) {
@@ -28,38 +26,7 @@ export class UpdateUserController {
 
             const params = httpRequest.body;
 
-            const allowedFields = [
-                'first_name',
-                'last_name',
-                'email',
-                'password',
-            ];
-
-            const someFieldIsNowAllowed = Object.keys(params).some(
-                (field) => !allowedFields.includes(field),
-            );
-
-            if (someFieldIsNowAllowed) {
-                return badRequest({
-                    message: 'Some provided field is not allowed.',
-                });
-            }
-
-            if (params.password) {
-                const passwordIsValid = checkIfPasswordIsValid(params.password);
-
-                if (!passwordIsValid) {
-                    return invalidPasswordResponse();
-                }
-            }
-
-            if (params.email) {
-                const emailIsValid = checkIfEmailIsValid(params.email);
-
-                if (!emailIsValid) {
-                    return emailIsAlreadyInUseResponse();
-                }
-            }
+            await updateUserSchema.parseAsync(params);
 
             const updatedUser = await this.updateUserUseCase.execute(
                 userId,
@@ -68,6 +35,20 @@ export class UpdateUserController {
 
             return ok(updatedUser);
         } catch (error) {
+            if (error instanceof ZodError) {
+                if (error.issues[0].code === 'unrecognized_keys') {
+                    return badRequest({
+                        message: 'Some provided value is not allowed.',
+                    });
+                }
+                const formattedErrors = error.issues.reduce((acc, issue) => {
+                    acc[issue.path[0]] = issue.message;
+                    return acc;
+                }, {});
+                console.log(formattedErrors);
+                return badRequest(formattedErrors);
+            }
+
             if (error instanceof EmailAlreadyInUseError) {
                 return badRequest({
                     message: error.message,
