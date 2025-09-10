@@ -1,25 +1,57 @@
-import { PostgresHelper } from '../../../db/postgres/helper.js';
+import { Decimal } from '@prisma/client/runtime/library.js';
+import { prisma } from '../../../database/prisma-client.js';
 
 export class PostgresGetUserBalanceRepository {
     async execute(userId) {
-        const balance = await PostgresHelper.query(
-            `SELECT
-                SUM(CASE WHEN type = 'EARNING' THEN amount ELSE 0 END) AS earnings,
-                SUM(CASE WHEN type = 'EXPENSE' THEN amount ELSE 0 END) AS expenses,
-                SUM(CASE WHEN type = 'INVESTMENT' THEN amount ELSE 0 END) AS investments,
-                (
-                    SUM(CASE WHEN type = 'EARNING' THEN amount ELSE 0 END)
-                    - SUM(CASE WHEN type = 'EXPENSE' THEN amount ELSE 0 END)
-                    - SUM(CASE WHEN type = 'INVESTMENT' THEN amount ELSE 0 END)
-                ) AS balance
-            FROM transactions
-            WHERE user_id = $1;`,
-            [userId],
+        const {
+            _sum: { amount: totalExpenses },
+        } = await prisma.transactions.aggregate({
+            where: {
+                user_id: userId,
+                type: 'EXPENSE',
+            },
+            _sum: {
+                amount: true,
+            },
+        });
+
+        const {
+            _sum: { amount: totalEarnings },
+        } = await prisma.transactions.aggregate({
+            where: {
+                user_id: userId,
+                type: 'EARNING',
+            },
+            _sum: {
+                amount: true,
+            },
+        });
+
+        const {
+            _sum: { amount: totalInvestments },
+        } = await prisma.transactions.aggregate({
+            where: {
+                user_id: userId,
+                type: 'INVESTMENT',
+            },
+            _sum: {
+                amount: true,
+            },
+        });
+
+        const _totalEarnings = totalEarnings || new Decimal(0);
+        const _totalExpenses = totalExpenses || new Decimal(0);
+        const _totalInvestments = totalInvestments || new Decimal(0);
+
+        const balance = Decimal(
+            _totalEarnings - _totalExpenses - _totalInvestments,
         );
 
         return {
-            userId,
-            ...balance[0],
+            earnings: _totalEarnings,
+            expenses: _totalExpenses,
+            investments: _totalInvestments,
+            balance,
         };
     }
 }
