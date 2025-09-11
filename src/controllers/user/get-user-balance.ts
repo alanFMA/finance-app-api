@@ -5,16 +5,30 @@ import {
     checkIfIdIsValid,
     invalidIdResponse,
     ok,
+    badRequest,
+    HttpResponse,
+    ErrorBody,
 } from '../helpers/index.js';
+import type { IGetUserBalanceUseCase } from '../../use-cases/interfaces.js';
+import type { HttpRequest } from '../types.js';
+import type { UserBalanceDTO } from '../../types/user.types.js';
 
 export class GetUserBalanceController {
-    constructor(getUserBalanceUseCase) {
+    private readonly getUserBalanceUseCase: IGetUserBalanceUseCase;
+
+    constructor(getUserBalanceUseCase: IGetUserBalanceUseCase) {
         this.getUserBalanceUseCase = getUserBalanceUseCase;
     }
 
-    async execute(httpRequest) {
+    async execute(
+        httpRequest: HttpRequest<any, { userId: string }>
+    ): Promise<HttpResponse<UserBalanceDTO | ErrorBody>> {
         try {
-            const userId = httpRequest.params.userId;
+            const userId = httpRequest.params?.userId;
+
+            if (!userId) {
+                return badRequest({ message: 'User ID is required.' });
+            }
 
             const idIsValid = checkIfIdIsValid(userId);
 
@@ -31,7 +45,8 @@ export class GetUserBalanceController {
             }
 
             console.error(error);
-            return serverError;
+
+            return serverError();
         }
     }
 }

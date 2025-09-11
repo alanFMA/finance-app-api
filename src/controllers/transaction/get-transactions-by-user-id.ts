@@ -6,24 +6,34 @@ import {
     requiredFieldsIsMissingResponse,
     serverError,
     userNotFoundResponse,
+    HttpResponse,
+    ErrorBody,
 } from '../helpers/index.js';
+import type { IGetTransactionsByUserIdUseCase } from '../../use-cases/interfaces.js';
+import type { HttpRequest } from '../types.js';
+import type { Transaction } from '../../types/transaction.type.js';
 
 export class GetTransactionsByUserIdController {
-    constructor(getTransactionsByUserIdUseCase) {
+    private readonly getTransactionsByUserIdUseCase: IGetTransactionsByUserIdUseCase;
+
+    constructor(
+        getTransactionsByUserIdUseCase: IGetTransactionsByUserIdUseCase
+    ) {
         this.getTransactionsByUserIdUseCase = getTransactionsByUserIdUseCase;
     }
-
-    async execute(httpRequest) {
+    async execute(
+        httpRequest: HttpRequest<any, any, { userId: string }>
+    ): Promise<HttpResponse<Transaction[] | ErrorBody>> {
         try {
-            const userId = httpRequest.query.userId;
+            const userId = httpRequest.query?.userId;
 
             if (!userId) {
                 return requiredFieldsIsMissingResponse('userId');
             }
 
-            const userIdIsvalid = checkIfIdIsValid(userId);
+            const userIdIsValid = checkIfIdIsValid(userId);
 
-            if (!userIdIsvalid) {
+            if (!userIdIsValid) {
                 return invalidIdResponse();
             }
 
@@ -34,11 +44,11 @@ export class GetTransactionsByUserIdController {
 
             return ok(transactions);
         } catch (error) {
-            console.error(error);
             if (error instanceof UserNotFoundError) {
                 return userNotFoundResponse();
             }
 
+            console.error(error);
             return serverError();
         }
     }
